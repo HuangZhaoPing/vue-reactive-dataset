@@ -1,0 +1,51 @@
+{
+  "name": "tiny-dict-vue",
+  "version": "1.0.0",
+  "description": "",
+  "main": "/dist/tiny-dict-vue.js",
+  "scripts": {
+    "dev": "webpack-dev-server --config build/webpack.dev.js",
+    "build": "webpack --config build/webpack.prod.js"
+  },
+  "keywords": [
+    "vue",
+    "dict",
+    "reactive",
+    "store"
+  ],
+  "author": "HuangZhaoPing <395342674@qq.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HuangZhaoPing/tiny-dict-vue"
+  },
+  "license": "MIT",
+  "files": [
+    "dist",
+    "types.d.ts"
+  ],
+  "types": "types.d.ts",
+  "devDependencies": {
+    "@types/memoizee": "^0.4.5",
+    "@vue/compiler-sfc": "^3.0.11",
+    "css-loader": "^5.2.6",
+    "element-plus": "^1.0.2-beta.46",
+    "file-loader": "^6.2.0",
+    "friendly-errors-webpack-plugin": "^1.7.0",
+    "html-webpack-plugin": "^5.3.1",
+    "memoizee": "^0.4.15",
+    "shared-js-api": "^0.2.4",
+    "style-loader": "^2.0.0",
+    "ts-loader": "^9.2.2",
+    "typescript": "^4.2.4",
+    "vue": "^3.0.11",
+    "vue-loader": "^16.2.0",
+    "webpack": "^5.37.1",
+    "webpack-cli": "^4.7.0",
+    "webpack-dev-server": "^4.0.0-beta.3",
+    "webpack-merge": "^5.7.3"
+  },
+  "peerDependencies": {
+    "vue": "^2.6.13",
+    "memoizee": "^0.4.15"
+  }
+}

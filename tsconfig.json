@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "lib": ["DOM", "ESNEXT"],
+    "baseUrl": ".",
+    "noEmitOnError": true,
+    "sourceMap": false,
+    "target": "ES5",
+    "outDir": "lib",
+    "strict": true,
+    "moduleResolution": "Node",
+    "paths": {
+      "@/*": ["src/*"],
+      "@root/*": ["/*"]
+    }
+  },
+  "exclude": ["node_modules"],
+  "include": ["src", "example"]
+}
