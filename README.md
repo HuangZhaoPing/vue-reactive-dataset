@@ -2,7 +2,7 @@
 
 一个基于 vue，集中式管理字典数据的插件。
 
-## 出现原因
+## 解决问题
 
 项目中经常会看到一些枚举型数据，比如：
 
@@ -387,4 +387,139 @@ export default new TinyDict({
 })
 ```
 
+## api
 
+### constructor (options)
+
+构造函数
+
+```js
+const dict = new TinyDict(options)
+```
+
+| Param |          Type          |                         Default                          | Description                                     |
+| :---: | :--------------------: | :------------------------------------------------------: | ----------------------------------------------- |
+| async |        boolean         |                          false                           | 是否为异步数据                                  |
+| data  | array \| () => Promise |                            -                             | asnyc 为 true 时，必须是一个返回 Promise 的函数 |
+| props |         object         | { label: 'label', value: 'value', children: 'children' } | 配置对象                                        |
+
+### get (key): Promise
+
+获取指定 key 的数据
+
+```js
+dict.get('sex').then(data => {
+  console.log(data)
+})
+```
+
+| Param |  Type  | Default | Description      |
+| :---: | :----: | :-----: | :--------------- |
+|  key  | string |    -    | 字典中对应的 key |
+
+### filter (options): Promise
+
+过滤指定 key、value 的数据
+
+```js
+dict.filter({ key: 'sex', value: 1 }).then(data => {
+  console.log(data)
+})
+```
+
+|    Param    |        Type        | Default | Description                                   |
+| :---------: | :----------------: | :-----: | :-------------------------------------------- |
+|     key     |       string       |    -    | 字典中对应的 key                              |
+|    value    |  string \| number  |    -    | 要查找的数据的 value                          |
+| returnLabel |      boolean       |  false  | 是否要返回 label，可以在 props 中设置对应字段 |
+|   propKey   | string \| string[] |    -    | 返回指定的字段，如果为数组，则返回数组        |
+
+### fetch (key): Promise
+
+异步数据不走缓存，每次都获取
+
+```js
+dict.fetch('sex').then(data => {
+  console.log(data)
+})
+```
+
+| Param |  Type  | Default | Description      |
+| :---: | :----: | :-----: | :--------------- |
+|  key  | string |    -    | 字典中对应的 key |
+
+### getConfig (key): object
+
+获取配置
+
+```js
+const config = dict.getConfig('sex')
+```
+
+| Param |  Type  | Default | Description      |
+| :---: | :----: | :-----: | :--------------- |
+|  key  | string |    -    | 字典中对应的 key |
+
+### deleteAsyncCache (key)
+
+删除已缓存的异步数据
+
+```js
+dict.deleteAsyncCache('sex')
+// 重新发起请求
+dict.get('sex').then(data => {
+  console.log(data)
+})
+```
+
+| Param |  Type  | Default | Description      |
+| :---: | :----: | :-----: | :--------------- |
+|  key  | string |    -    | 字典中对应的 key |
+
+### reactive.get(key)
+
+响应式在模板中获取数据，参数与 get 一致
+
+```html
+<el-select>
+  <el-option v-for="item in dict.reactive.get('sex')" />
+</el-select>
+```
+
+或者
+
+```html
+<el-select>
+  <el-option v-for="item in sexList" />
+</el-select>
+
+<el-select>
+  <el-option v-for="item in getChannel()" />
+</el-select>
+```
+
+```js
+import dict from '@/dict'
+import { computed } from 'vue'
+
+export default {
+  setup () {
+    return {
+      // computed 模式
+      sexList: computed(() => dict.reactive.get('sex')),
+      // 函数模式
+      getChannel: () => dict.reactive.get('channel')
+    }
+  }
+}
+```
+
+### reactive.filter(options)
+
+响应式在模板中过滤数据，参数与 filter 一致
+
+```html
+<div>{{ dict.reactive.filter({ key: 'sex', value: 1, returnLabel: true }) }}</div>
+
+<div>{{ dict.reactive.filter({ key: 'sex', value: 1, propKey: ['label', 'value'] }) }}</div>
+```
