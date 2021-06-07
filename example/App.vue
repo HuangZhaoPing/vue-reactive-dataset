@@ -38,11 +38,11 @@
   </div>
 </template>
 
-<script>
-import { ref } from 'vue'
+<script lang="ts">
+import { ref, defineComponent } from 'vue'
 import dict from './dict'
 
-export default {
+export default defineComponent({
   setup () {
     dict.filter({ key: 'channel', value: 1, returnLabel: true }).then(data => {
     })
@@ -60,11 +60,11 @@ export default {
       formData,
       tableData,
       dict,
-      filter: value => {
+      filter: (value: number) => {
         const values = dict.reactive.filter({ key: 'channel', value, propKey: ['channelName', 'channelId'] })
         return values && values.join('-')
       }
     }
   }
-}
+})
 </script>
