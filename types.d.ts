@@ -18,6 +18,7 @@ declare interface ReactiveOptions {
 }
 
 declare class Dict {
+  constructor (config: DictOptions)
   get reactive (): ReactiveOptions
   getConfig (key: string): DictConfig
   get (key: string): Promise<any>
