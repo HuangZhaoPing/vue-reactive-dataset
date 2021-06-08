@@ -7,7 +7,11 @@ import { reactive } from 'vue'
 import Vue from 'vue'
 
 export default class Dict {
-  private defaultProps: DictProps = { label: 'label', value: 'value', children: 'children' }
+  private defaultConfig: DictConfig = {
+    async: false,
+    data: [],
+    props: { label: 'label', value: 'value', children: 'children' }
+  }
   private isVue3: boolean = !!reactive
   private config: DictOptions
   private store: any
@@ -36,7 +40,7 @@ export default class Dict {
       }
     }
   }
-  private createAsyncMemo (): ((key: string) => Promise<any>) & memoize.Memoized<(key: string) => Promise<any>> {
+  private createAsyncMemo () {
     return memoize(async (key: string) => {
       try {
         return await this.getConfig(key).data()
@@ -46,16 +50,16 @@ export default class Dict {
       }
     }, { promise: true }) 
   }
-  private createFilterMemo (): ((key: string, value: string | number) => any) & memoize.Memoized<(key: string, value: string | number) => any> {
+  private createFilterMemo () {
     return memoize((key: string, value: string | number) => {
-      return this.handleFilter(this.store[key] || [], value, this.getMergeProps(key))
+      return this.handleFilter(this.store[key] || [], value, this.getConfig(key).props!)
     })
   }
   private handleFilter (data: any, value: string | number, props: DictProps): any {
     for (let i = 0; i < data.length; i++) {
       const item = data[i]
-      if (toNumber(item[props.value as string]) === toNumber(value)) return item
-      const children = item[props.children as string]
+      if (toNumber(item[props.value!]) === toNumber(value)) return item
+      const children = item[props.children!]
       if (children) {
         const target = this.handleFilter(children, value, props)
         if (target) return target
@@ -68,25 +72,26 @@ export default class Dict {
       this.isVue3 ? (this.store[key] = data) : Vue.set(this.store, key, data)
     }
   }
-  private getFilterValue (options: FilterOptions): any {
+  private getFilterValue (options: FilterOptions) {
     const { key, value, returnLabel, propKey } = options
+    const props = this.getConfig(key).props
     const data = this.filterMemo(key, value)
     if (data) {
       if (returnLabel) {
-        return data[this.getMergeProps(key).label as string]
+        return data[props?.label!]
       }
       if (propKey) {
-        console.log(propKey)
         return Array.isArray(propKey) ? propKey.map((key: string) => data[key]) : data[propKey]
       }
     }
     return data
   }
-  private getMergeProps (key: string): DictProps {
-    return Object.assign({}, this.defaultProps, this.getConfig(key).props)
-  }
   getConfig (key: string): DictConfig {
-    return this.config[key]
+    return {
+      ...this.defaultConfig,
+      ...this.config[key],
+      props: Object.assign({}, this.defaultConfig.props, this.config[key].props)
+    }
   }
   get (key: string): Promise<any> {
     return new Promise((resolve, reject) => {
