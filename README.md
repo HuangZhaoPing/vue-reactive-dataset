@@ -2,6 +2,8 @@
 
 一个基于 vue，集中式管理字典数据的插件，支持 vue2 与 vue3。
 
+注：**tiny-dict-vue 依赖了 memoizee，memoizee 在 vite 或 snowpack 构建的项目中使用会报错，等后续更新解决此问题**
+
 ## Features
 
 - 集中式
@@ -13,8 +15,10 @@
 
 ## Usage
 
+依赖 memoizee
+
 ```shell
-npm i tiny-dict-vue -S
+npm i memoizee tiny-dict-vue -S
 ```
 
 ```js
@@ -37,29 +41,45 @@ export default dict
 import TinyDict from 'tiny-dict-vue'
 
 const dict = new TinyDict({
-  // 同步数据
-  sex: {
-    data: [
-      { label: '男', value: 1 },
-      { label: '女', value: 2 }
-    ]
+  // 最大缓存数
+  max: {
+    async: 50,
+    filter: 100
   },
-  // 异步数据，假设接口返回 { "code": 200, data: [{ "channelName": "苹果", "channelId": 1 }, { "channelName": "小米", "channelId": 2 }] }
-  channel: {
-    async: true,
-    data: async () => {
-      const { data } = await axios({ url: '/api/channel', methods: 'GET' })
-      return data || []
+  config: {
+    // 同步数据
+    sex: {
+      data: [
+        { label: '男', value: 1 },
+        { label: '女', value: 2 }
+      ]
     },
-    props: {
-      label: 'channelName',
-      value: 'channelId'
+    // 异步数据，假设接口返回 { "code": 200, data: [{ "channelName": "苹果", "channelId": 1 }, { "channelName": "小米", "channelId": 2 }] }
+    channel: {
+      async: true,
+      data: async () => {
+        const { data } = await axios({ url: '/api/channel', methods: 'GET' })
+        return data || []
+      },
+      props: {
+        label: 'channelName',
+        value: 'channelId'
+      }
     }
   }
 })
 
 export default dict
 ```
+
+max 参数（可选）：
+
+| Param |          Type          |                         Default                          | Required | Description                                    |
+| :---: | :--------------------: | :------------------------------------------------------: | :------: | ---------------------------------------------- |
+| async |        number         |                          50                           |  false   | 异步数据最大缓存个数                                 |
+| filter  |      number         |                            100                             |   false   |   过滤器最大缓存                       |
+
+config 参数：
 
 | Param |          Type          |                         Default                          | Required | Description                                    |
 | :---: | :--------------------: | :------------------------------------------------------: | :------: | ---------------------------------------------- |
@@ -404,7 +424,7 @@ axios({
 }
 ```
 
-可以这么做：
+创建 dict：
 
 ```js
 import TinyDict from 'tiny-dict-vue'
@@ -431,8 +451,10 @@ function getDictConfig (type) {
 }
 
 const remoteDict = new TinyDict({
-  channel: getDictConfig('channel'),
-  status: getDictConfig('status')
+  config: {
+    channel: getDictConfig('channel'),
+    status: getDictConfig('status')
+  }
 })
 
 export default remoteDict
@@ -441,34 +463,11 @@ export default remoteDict
 之后每新增一个字典，加一行代码就行，但这种方式可能比较繁琐，可以使用 Proxy 解决此问题，如：
 
 ```js
-import TinyDict from 'tiny-dict-vue'
-
-// 从接口中获取数据
-async function getRemoteDict (type) {
-  const { data } = await axios({
-    url: '/api/getDict',
-    method: 'GET',
-    params: { type }
+const remoteDict = new TinyDict({
+  config: new Proxy({}, {
+    get: (target, key) => getDictConfig(key)
   })
-  return data
-}
-
-function getDictConfig (type) {
-  return {
-    async: true,
-    data: () => getRemoteDict(type),
-    props: {
-      label: 'name',
-      value: 'id'
-    }
-  }
-}
-
-const remoteDict = new TinyDict(new Proxy({}, {
-  get: (target, key) => getDictConfig(key)
-}))
-
-export default remoteDict
+})
 ```
 
-end
+完

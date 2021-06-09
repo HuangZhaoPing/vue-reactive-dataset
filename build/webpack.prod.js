@@ -33,5 +33,5 @@ module.exports = merge(common, {
       banner: `${name}.js\nversion: ${version}`
     })
   ],
-  externals: ['vue']
+  externals: ['vue', 'memoizee']
 })

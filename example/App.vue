@@ -1,39 +1,31 @@
 <template>
   <div>
-    <br>
+    <!-- <div>{{ dict1.reactive.get('status') }}</div>
+    <div>{{ dict1.reactive.get('channel') }}</div> -->
 
-    {{ dict.reactive.get('channel') }}
-
-    <br>
-
-    {{ dict.reactive.get('status') }}
-
-    <el-button @click="test1">adf</el-button>
-    <el-button @click="test2">vvv</el-button>
+    <div>{{ dict2.reactive.get('status') }}</div>
+    <div>{{ dict2.reactive.get('channel') }}</div>
+    <div>
+      <el-button @click="test1">status</el-button>
+      <el-button @click="test2">channel</el-button>
+    </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import dict from './dict'
+import { dict1, dict2 } from './dict'
 
 export default defineComponent({
   setup () {
-    dict.get('channel').then(data => {
-      console.log('vvvvv', data)
-    })
-
     return {
-      dict,
+      dict1,
+      dict2,
       test1 () {
-        dict.filter({ key: 'channel', value: 1 }).then(data => {
-          console.log('vvvvv', data)
-        })
+        dict1.filter({ key: 'status', value: 1 }).then(data => console.log(data))
       },
       test2 () {
-        dict.fetch('channel').then(data => {
-          console.log('vvvvv', data)
-        })
+        dict1.filter({ key: 'channel', value: 1 }).then(data => console.log(data))
       }
     }
   }

@@ -10,7 +10,15 @@ declare interface DictConfig {
   data: any | Promise<any>
 }
 
-declare type DictOptions = Record<string, DictConfig>
+declare interface MaxOptions {
+  filter?: number
+  async?: number
+}
+
+declare interface DictOptions {
+  max?: MaxOptions
+  config: Record<string, DictConfig>
+}
 
 declare interface ReactiveOptions {
   get (key: string): any
@@ -42,7 +50,8 @@ export {
   DictConfig,
   DictOptions,
   DictProps,
-  FilterOptions
+  FilterOptions,
+  MaxOptions
 }
 
 export default Dict
