@@ -1,6 +1,6 @@
 /*!
  * tiny-dict-vue.js
- * version: 1.0.4
+ * version: 1.0.5
  */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')

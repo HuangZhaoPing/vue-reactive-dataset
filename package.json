@@ -1,8 +1,8 @@
 {
   "name": "tiny-dict-vue",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "",
-  "main": "/dist/tiny-dict-vue.js",
+  "main": "/dist/tiny-dict-vue.min.js",
   "scripts": {
     "dev": "webpack-dev-server --config build/webpack.dev.js",
     "build": "webpack --config build/webpack.prod.js"
