@@ -1,68 +1,39 @@
 <template>
   <div>
-    <el-select v-model="formData.sex">
-      <el-option
-        v-for="item in dict.reactive.get('sex')"
-        :key="item.value"
-        :label="item.label"
-        :value="item.value" />
-    </el-select>
+    <br>
 
-    <el-select v-model="formData.channel">
-      <el-option
-        v-for="item in dict.reactive.get('channel')"
-        :key="item.channelId"
-        :label="item.channelName"
-        :value="item.channelId" />
-    </el-select>
+    {{ dict.reactive.get('channel') }}
 
-    <el-cascader v-model="formData.foodCategory" :options="dict.reactive.get('foodCategory')" :props="{ label: 'name', value: 'id' }" />
-  
-    <el-table :data="tableData" border>
-      <el-table-column label="性别">
-        <template #default="{ row }">
-          {{ dict.reactive.filter({ key: 'sex', value: row.sex, returnLabel: true }) }}
-        </template>
-      </el-table-column>
-      <el-table-column label="渠道">
-        <template #default="{ row }">
-          {{ filter(row.channel) }}
-        </template>
-      </el-table-column>
-      <el-table-column label="性别">
-        <template #default="{ row }">
-          {{ dict.reactive.filter({ key: 'foodCategory', value: row.foodCategory, propKey: ['id', 'name'] }) }}
-        </template>
-      </el-table-column>
-    </el-table>
+    <br>
+
+    {{ dict.reactive.get('status') }}
+
+    <el-button @click="test1">adf</el-button>
+    <el-button @click="test2">vvv</el-button>
   </div>
 </template>
 
 <script lang="ts">
-import { ref, defineComponent } from 'vue'
+import { defineComponent } from 'vue'
 import dict from './dict'
 
 export default defineComponent({
   setup () {
-    dict.filter({ key: 'channel', value: 1, returnLabel: true }).then(data => {
+    dict.get('channel').then(data => {
+      console.log('vvvvv', data)
     })
-    const formData = ref({
-      sex: '',
-      channel: '',
-      foodCategory: ''
-    })
-    const tableData = [
-      { sex: 1, channel: 1, foodCategory: 1 },
-      { sex: 2, channel: 3, foodCategory: 11 },
-      { sex: 1, channel: 1, foodCategory: 1 }
-    ]
+
     return {
-      formData,
-      tableData,
       dict,
-      filter: (value: number) => {
-        const values = dict.reactive.filter({ key: 'channel', value, propKey: ['channelName', 'channelId'] })
-        return values && values.join('-')
+      test1 () {
+        dict.filter({ key: 'channel', value: 1 }).then(data => {
+          console.log('vvvvv', data)
+        })
+      },
+      test2 () {
+        dict.fetch('channel').then(data => {
+          console.log('vvvvv', data)
+        })
       }
     }
   }
