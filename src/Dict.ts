@@ -14,17 +14,6 @@ const defaultMax: MaxOptions = {
   filter: 100
 }
 
-const isVue3: boolean = !!reactive
-const defaultConfig: DictConfig = {
-  async: false,
-  data: [],
-  props: { label: 'label', value: 'value', children: 'children' }
-}
-const defaultMax: MaxOptions = {
-  async: 50,
-  filter: 100
-}
-
 export default class Dict {
   private config: Record<string, DictConfig>
   private store: Store
@@ -83,6 +72,7 @@ export default class Dict {
     }
     return null
   }
+
   private getFilterValue (options: FilterOptions) {
     const { key, value, returnLabel, propKey } = options
     const props = this.getConfig(key).props
@@ -137,6 +127,7 @@ export default class Dict {
         .catch(err => reject(err))
     })
   }
+  
   deleteAsyncCache (key: string): Promise<any> {
     return this.asyncMemo.delete(key)
   }
