@@ -1,10 +1,18 @@
-import { DictConfig, DictOptions, DictProps, ReactiveOptions, FilterOptions, MaxOptions } from 'types'
+import { DictConfig, DictOptions, DictProps, ReactiveOptions, FilterOptions, MaxOptions, AsyncMemo, FilterMemo } from 'types'
+import Store from './Store'
 import * as memoize from 'memoizee'
 import { toNumber } from 'shared-js-api'
-// @ts-ignore
-import { reactive } from 'vue'
-// @ts-ignore
-import Vue from 'vue'
+
+const defaultConfig: DictConfig = {
+  async: false,
+  data: [],
+  props: { label: 'label', value: 'value', children: 'children' }
+}
+
+const defaultMax: MaxOptions = {
+  async: 50,
+  filter: 100
+}
 
 const isVue3: boolean = !!reactive
 const defaultConfig: DictConfig = {
@@ -19,27 +27,28 @@ const defaultMax: MaxOptions = {
 
 export default class Dict {
   private config: Record<string, DictConfig>
-  private store: any
-  private asyncMemo: ((key: string) => Promise<any>) & memoize.Memoized<(key: string) => Promise<any>>
-  private filterMemo: ((key: string, value: string | number) => any) & memoize.Memoized<(key: string, value: string | number) => any>
+  private store: Store
+  private asyncMemo: (AsyncMemo) & memoize.Memoized<AsyncMemo>
+  private filterMemo: (FilterMemo) & memoize.Memoized<FilterMemo>
   private max: MaxOptions
   
   constructor (options: DictOptions) {
     this.config = options.config
     this.max = Object.assign(defaultMax, options.max)
-    this.store = isVue3 ? reactive({}) : Vue.observable({})
-    this.asyncMemo = this.createAsyncMemo()
-    this.filterMemo = this.createFilterMemo()
+    this.store = new Store()
+    this.asyncMemo = memoize(this.asyncHandler, { promise: true, max: this.max.async })
+    this.filterMemo = memoize(this.filterHandler, { max: this.max.filter })
   }
+
   get reactive (): ReactiveOptions {
     return {
       get: (key: string): any => {
-        if (!Reflect.has(this.store, key)) this.get(key)
-        return this.store[key]
+        if (!this.store.has(key)) this.get(key)
+        return this.store.get(key)
       },
       filter: (options: FilterOptions): any => {
         const key = options.key
-        if (!Reflect.has(this.store, key)) {
+        if (!this.store.has(key)) {
           this.get(key)
           return null
         }
@@ -47,25 +56,20 @@ export default class Dict {
       }
     }
   }
-  private createAsyncMemo () {
-    const func = async (key: string) => {
-      try {
-        return await this.getConfig(key).data()
-      } catch (error) {
-        this.deleteAsyncCache(key)
-        Promise.reject(error)
-      }
+
+  private async asyncHandler (key: string) {
+    try {
+      return await this.getConfig(key).data()
+    } catch (error) {
+      this.deleteAsyncCache(key)
+      Promise.reject(error)
     }
-    const options = { promise: true, max: this.max.async }
-    return memoize(func, options) 
   }
-  private createFilterMemo () {
-    const func = (key: string, value: string | number) => {
-      return this.excuteFilter(this.store[key], value, this.getConfig(key).props!)
-    }
-    const options = { max: this.max.filter }
-    return memoize(func, options)
+
+  private filterHandler (key: string, value: string | number) {
+    return this.excuteFilter(this.store.get(key), value, this.getConfig(key).props!)
   }
+
   private excuteFilter (data: any, value: string | number, props: DictProps): any {
     if (!data) return null
     for (let i = 0; i < data.length; i++) {
@@ -79,12 +83,6 @@ export default class Dict {
     }
     return null
   }
-  private addStoreProp (key: string, data: any) {
-    if (!Reflect.has(this.store, key)) isVue3 ? (this.store[key] = data) : Vue.set(this.store, key, data)
-  }
-  private deleteStoreProp (key: string): boolean {
-    return Reflect.deleteProperty(this.store, key)
-  }
   private getFilterValue (options: FilterOptions) {
     const { key, value, returnLabel, propKey } = options
     const props = this.getConfig(key).props
@@ -95,11 +93,13 @@ export default class Dict {
     }
     return data
   }
+
   getConfig (key: string): DictConfig {
     const config = Object.assign({}, defaultConfig, this.config[key])
     config.props = Object.assign({}, defaultConfig.props, this.config[key].props)
     return config
   }
+
   get (key: string): Promise<any> {
     return new Promise((resolve, reject) => {
       const config = this.getConfig(key)
@@ -110,23 +110,25 @@ export default class Dict {
         if (async && typeof data === 'function') {
           this.asyncMemo(key)
             .then((data: any) => {
-              this.addStoreProp(key, data)
+              this.store.set(key, data)
               resolve(data)
             })
             .catch((err: Error) => reject(err))
         } else {
-          this.addStoreProp(key, data)
+          this.store.set(key, data)
           resolve(data)
         }
       }
     })
   }
+
   fetch (key: string): Promise<any> {
-    this.deleteStoreProp(key)
+    this.store.delete(key)
     this.deleteAsyncCache(key)
     this.clearFilterCache()
     return this.get(key)
   }
+
   filter (options: FilterOptions): Promise<any> {
     return new Promise((resolve, reject) => {
       this
@@ -138,9 +140,11 @@ export default class Dict {
   deleteAsyncCache (key: string): Promise<any> {
     return this.asyncMemo.delete(key)
   }
+
   clearAsyncCache () {
     this.asyncMemo.clear()
   }
+  
   clearFilterCache () {
     this.filterMemo.clear()
   }

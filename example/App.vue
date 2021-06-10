@@ -1,7 +1,7 @@
 <template>
   <div>
-    <!-- <div>{{ dict1.reactive.get('status') }}</div>
-    <div>{{ dict1.reactive.get('channel') }}</div> -->
+    <div>{{ dict1.reactive.get('status') }}</div>
+    <div>{{ dict1.reactive.get('channel') }}</div>
 
     <div>{{ dict2.reactive.get('status') }}</div>
     <div>{{ dict2.reactive.get('channel') }}</div>

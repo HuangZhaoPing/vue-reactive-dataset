@@ -45,13 +45,27 @@ declare interface FilterOptions {
   propKey?: string | string[]
 }
 
+declare class Store {
+  constructor()
+  set (key: string, value: any): void
+  get (key: string): any
+  has (key: string): boolean
+  delete (key: string): boolean
+}
+
+declare type AsyncMemo = (key: string) => Promise<any>
+declare type FilterMemo = (key: string, value: string | number) => any
+
 export {
   ReactiveOptions,
   DictConfig,
   DictOptions,
   DictProps,
   FilterOptions,
-  MaxOptions
+  MaxOptions,
+  Store,
+  AsyncMemo,
+  FilterMemo
 }
 
 export default Dict
