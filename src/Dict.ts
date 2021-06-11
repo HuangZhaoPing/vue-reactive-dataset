@@ -1,6 +1,6 @@
 import { DictConfig, DictOptions, DictProps, ReactiveOptions, FilterOptions, MaxOptions, AsyncMemo, FilterMemo } from 'types'
 import Store from './Store'
-import * as memoize from 'memoizee'
+import memoize from 'memoizee'
 import { toNumber } from 'shared-js-api'
 
 const defaultConfig: DictConfig = {

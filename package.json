@@ -1,11 +1,11 @@
 {
   "name": "tiny-dict-vue",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "",
   "main": "/dist/tiny-dict-vue.min.js",
   "scripts": {
-    "dev": "webpack-dev-server --config build/webpack.dev.js",
-    "build": "webpack --config build/webpack.prod.js"
+    "dev": "webpack-dev-server --config scripts/dev.js",
+    "build": "rollup --config scripts/build.js"
   },
   "keywords": [
     "vue",
@@ -25,6 +25,8 @@
   ],
   "types": "types.d.ts",
   "devDependencies": {
+    "@rollup/plugin-node-resolve": "^13.0.0",
+    "@rollup/plugin-typescript": "^8.2.1",
     "@types/memoizee": "^0.4.5",
     "@vue/compiler-sfc": "^3.0.11",
     "css-loader": "^5.2.6",
@@ -33,6 +35,8 @@
     "friendly-errors-webpack-plugin": "^1.7.0",
     "html-webpack-plugin": "^5.3.1",
     "memoizee": "^0.4.15",
+    "rollup": "^2.51.2",
+    "rollup-plugin-terser": "^7.0.2",
     "shared-js-api": "^0.2.4",
     "style-loader": "^2.0.0",
     "ts-loader": "^9.2.2",
@@ -41,8 +45,7 @@
     "vue-loader": "^16.2.0",
     "webpack": "^5.37.1",
     "webpack-cli": "^4.7.0",
-    "webpack-dev-server": "^4.0.0-beta.3",
-    "webpack-merge": "^5.7.3"
+    "webpack-dev-server": "^4.0.0-beta.3"
   },
   "peerDependencies": {
     "vue": "^2.6.13",

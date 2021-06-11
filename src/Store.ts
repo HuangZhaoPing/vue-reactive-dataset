@@ -9,10 +9,12 @@ class Store {
   private store: any
 
   constructor () {
+    // @ts-ignore
     this.store = isVue3 ? reactive({}) : Vue.observable({})
   }
 
   set (key: string, value: any): void {
+    // @ts-ignore
     isVue3 ? (this.store[key] = value) : (Vue.set(this.store, key, value))
   }
 

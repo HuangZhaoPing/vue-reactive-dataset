@@ -1,17 +1,26 @@
+const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { VueLoaderPlugin } = require('vue-loader')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
-const { resolve } = require('./utils')
-const common = require('./webpack.common')
-const { merge } = require('webpack-merge')
 
-module.exports = merge(common, {
+const resolve = (...value) => {
+  return path.resolve(__dirname, '..', ...value)
+}
+
+module.exports = {
   mode: 'development',
   devtool: 'inline-source-map',
   entry: resolve('example/main.ts'),
   output: {
     path: resolve('dist'),
     filename: '[name].js'
+  },
+  resolve: {
+    alias: {
+      '@': resolve('src'),
+      '@root': resolve('.')
+    },
+    extensions: ['.ts', '.js']
   },
   devServer: {
     host: 'localhost',
@@ -22,6 +31,16 @@ module.exports = merge(common, {
   },
   module: {
     rules: [
+      {
+        test: /\.ts?$/,
+        use: {
+          loader: 'ts-loader',
+          options: {
+            appendTsSuffixTo: [/\.vue$/]
+          }
+        },
+        exclude: /node_modules/
+      },
       {
         test: /\.vue?$/,
         use: 'vue-loader'
@@ -48,4 +67,4 @@ module.exports = merge(common, {
     }),
     new VueLoaderPlugin()
   ]
-})
+}
