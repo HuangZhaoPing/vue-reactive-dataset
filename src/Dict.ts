@@ -3,13 +3,12 @@ import Store from './Store'
 import memoize from 'memoizee'
 import { toNumber } from 'shared-js-api'
 
-const defaultConfig: DictConfig = {
+const defaultConfig = {
   async: false,
-  data: [],
   props: { label: 'label', value: 'value', children: 'children' }
 }
 
-const defaultMax: MaxOptions = {
+const defaultMax = {
   async: 50,
   filter: 100
 }
