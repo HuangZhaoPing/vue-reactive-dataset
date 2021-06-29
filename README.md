@@ -103,9 +103,8 @@ config 参数：
     </el-select>
   </div>
 </template>
-```
 
-```js
+<script>
 // 引用上方数据
 import dict from '@/dict'
 import { ref } from 'vue'
@@ -126,6 +125,7 @@ export default {
     }
   }
 }
+</script>
 ```
 
 ### reactive.filter (options)
@@ -137,9 +137,8 @@ export default {
   <!-- 最终渲染为：苹果 -->
   <div>{{ dict.reactive.filter({ key: 'channel', value: 1, returnLabel: true }) }}</div>
 </template>
-```
 
-```js
+<script>
 import dict from '@/dict'
 
 export default {
@@ -149,6 +148,7 @@ export default {
     }
   }
 }
+</script>
 ```
 
 |    Param    |        Type        | Default | Required | Description                                                  |
@@ -264,9 +264,7 @@ DictSelect.vue：
       :value="item[value]" />
   </el-select>
 </template>
-```
 
-```js
 <script>
 import { computed } from 'vue'
 import dict from '@/dict'
@@ -301,9 +299,7 @@ export default {
     <dict-select v-model="formData.channel" dict-key="channel" />
   </div>
 </template>
-```
 
-```js
 <script>
 import { ref } from 'vue'
 import DictSelect from './components/DictSelect.vue'
@@ -335,9 +331,7 @@ DictTableColumn.vue：
 <template>
   <el-table-column v-bind="$attrs" :prop="prop" :formatter="formatter" />
 </template>
-```
 
-```js
 <script>
 import dict from '@/dict'
 
@@ -373,9 +367,7 @@ export default {
     <dict-table-column label="渠道" prop="channel" dict-key="channel" />
   </el-table>
 </template>
-```
 
-```js
 <script>
 import DictTableColumn from './components/DictTableColumn.vue'
 
