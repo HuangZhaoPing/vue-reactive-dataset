@@ -22,7 +22,7 @@ export default class Dict {
     this.max = options.max || defaultMax
     this.store = new Store()
     this.asyncMemo = memoize(this.asyncHandler, { promise: true, max: this.max })
-    this.filterMemo = memoize(this.filterHandler)
+    this.filterMemo = memoize(this.filterHandler, { maxAge: 3600 })
   }
 
   get reactive (): ReactiveOptions {

@@ -1,4 +1,4 @@
-/* version: 1.0.8 */
+/* version: 1.0.9 */
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('vue'), require('memoizee')) :
     typeof define === 'function' && define.amd ? define(['vue', 'memoizee'], factory) :
@@ -121,7 +121,7 @@
             this.max = options.max || defaultMax;
             this.store = new Store();
             this.asyncMemo = memoize__default['default'](this.asyncHandler, { promise: true, max: this.max });
-            this.filterMemo = memoize__default['default'](this.filterHandler);
+            this.filterMemo = memoize__default['default'](this.filterHandler, { maxAge: 3600 });
         }
         Object.defineProperty(Dict.prototype, "reactive", {
             get: function () {
