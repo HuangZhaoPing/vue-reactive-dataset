@@ -41,11 +41,8 @@ export default dict
 import TinyDict from 'tiny-dict-vue'
 
 const dict = new TinyDict({
-  // 最大缓存数
-  max: {
-    async: 50,
-    filter: 100
-  },
+  // 异步数据最大缓存数
+  max: 100,
   config: {
     // 同步数据
     sex: {
@@ -76,8 +73,7 @@ max 参数（可选）：
 
 | Param |          Type          |                         Default                          | Required | Description                                    |
 | :---: | :--------------------: | :------------------------------------------------------: | :------: | ---------------------------------------------- |
-| async |        number         |                          50                           |  false   | 异步数据最大缓存个数                                 |
-| filter  |      number         |                            100                             |   false   |   过滤器最大缓存                       |
+| max |        number         |                          50                           |  false   | 异步数据最大缓存个数                                 |
 
 config 参数：
 
