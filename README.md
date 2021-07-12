@@ -58,7 +58,7 @@ const dict = new TinyDict({
     channel: {
       async: true,
       data: async () => {
-        const { data } = await axios({ url: '/api/channel', methods: 'GET' })
+        const { data } = await axios({ url: '/api/channel', method: 'GET' })
         return data || []
       },
       props: {
