@@ -1,6 +1,7 @@
 import TinyDict from '@/index'
 
 const dict1 = new TinyDict({
+  max: 2,
   config: {
     sex: {
       data: [

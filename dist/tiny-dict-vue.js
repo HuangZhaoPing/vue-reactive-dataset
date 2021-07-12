@@ -1,4 +1,4 @@
-/* version: 1.0.7 */
+/* version: 1.0.8 */
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('vue'), require('memoizee')) :
     typeof define === 'function' && define.amd ? define(['vue', 'memoizee'], factory) :
@@ -112,20 +112,16 @@
 
     var defaultConfig = {
         async: false,
-        data: [],
         props: { label: 'label', value: 'value', children: 'children' }
     };
-    var defaultMax = {
-        async: 50,
-        filter: 100
-    };
+    var defaultMax = 100;
     var Dict = /** @class */ (function () {
         function Dict(options) {
             this.config = options.config;
-            this.max = Object.assign(defaultMax, options.max);
+            this.max = options.max || defaultMax;
             this.store = new Store();
-            this.asyncMemo = memoize__default['default'](this.asyncHandler, { promise: true, max: this.max.async });
-            this.filterMemo = memoize__default['default'](this.filterHandler, { max: this.max.filter });
+            this.asyncMemo = memoize__default['default'](this.asyncHandler, { promise: true, max: this.max });
+            this.filterMemo = memoize__default['default'](this.filterHandler);
         }
         Object.defineProperty(Dict.prototype, "reactive", {
             get: function () {

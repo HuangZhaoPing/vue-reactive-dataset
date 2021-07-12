@@ -1,4 +1,4 @@
-import { DictConfig, DictOptions, DictProps, ReactiveOptions, FilterOptions, MaxOptions, AsyncMemo, FilterMemo } from 'types'
+import { DictConfig, DictOptions, DictProps, ReactiveOptions, FilterOptions, AsyncMemo, FilterMemo } from 'types'
 import Store from './Store'
 import memoize from 'memoizee'
 import { toNumber } from 'shared-js-api'
@@ -8,24 +8,21 @@ const defaultConfig = {
   props: { label: 'label', value: 'value', children: 'children' }
 }
 
-const defaultMax = {
-  async: 50,
-  filter: 100
-}
+const defaultMax = 100
 
 export default class Dict {
   private config: Record<string, DictConfig>
   private store: Store
   private asyncMemo: (AsyncMemo) & memoize.Memoized<AsyncMemo>
   private filterMemo: (FilterMemo) & memoize.Memoized<FilterMemo>
-  private max: MaxOptions
+  private max: number
   
   constructor (options: DictOptions) {
     this.config = options.config
-    this.max = Object.assign(defaultMax, options.max)
+    this.max = options.max || defaultMax
     this.store = new Store()
-    this.asyncMemo = memoize(this.asyncHandler, { promise: true, max: this.max.async })
-    this.filterMemo = memoize(this.filterHandler, { max: this.max.filter })
+    this.asyncMemo = memoize(this.asyncHandler, { promise: true, max: this.max })
+    this.filterMemo = memoize(this.filterHandler)
   }
 
   get reactive (): ReactiveOptions {

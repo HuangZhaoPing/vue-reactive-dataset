@@ -10,13 +10,8 @@ declare interface DictConfig {
   data: any | Promise<any>
 }
 
-declare interface MaxOptions {
-  filter?: number
-  async?: number
-}
-
 declare interface DictOptions {
-  max?: MaxOptions
+  max?: number
   config: Record<string, DictConfig>
 }
 
@@ -32,7 +27,6 @@ declare class Dict {
   get (key: string): Promise<any>
   fetch (key: string): Promise<any>
   filter (options: FilterOptions): Promise<any>
-  deleteStoreProp (key: string): boolean
   deleteAsyncCache (key: string): Promise<any>
   clearAsyncCache (): void
   clearFilterCache (): void
@@ -62,7 +56,6 @@ export {
   DictOptions,
   DictProps,
   FilterOptions,
-  MaxOptions,
   Store,
   AsyncMemo,
   FilterMemo
