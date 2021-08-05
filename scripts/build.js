@@ -1,4 +1,3 @@
-import { nodeResolve } from '@rollup/plugin-node-resolve'
 import typescript from '@rollup/plugin-typescript'
 import { terser } from 'rollup-plugin-terser'
 import { name, version } from '../package.json'
@@ -10,6 +9,7 @@ const mergeConfig = config => {
     banner: `/* version: ${version} */`,
     globals: {
       vue: 'Vue',
+      'shared-js-api': 'SHARED-JS-API',
       'mini-memoize': 'MINI-MEMOIZE'
     },
     ...config
@@ -31,6 +31,6 @@ export default {
       })]
     })
   ],
-  plugins: [nodeResolve(), typescript()],
-  external: ['vue', 'mini-memoize']
+  plugins: [typescript()],
+  external: ['vue', 'shared-js-api', 'mini-memoize']
 }

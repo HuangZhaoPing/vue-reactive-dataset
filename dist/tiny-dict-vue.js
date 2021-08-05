@@ -1,9 +1,9 @@
-/* version: 1.1.0 */
+/* version: 1.1.1 */
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('vue'), require('mini-memoize')) :
-    typeof define === 'function' && define.amd ? define(['vue', 'mini-memoize'], factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global['TINY-DICT-VUE'] = factory(global.Vue, global['MINI-MEMOIZE']));
-}(this, (function (Vue, memoize) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('vue'), require('mini-memoize'), require('shared-js-api')) :
+    typeof define === 'function' && define.amd ? define(['vue', 'mini-memoize', 'shared-js-api'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global['TINY-DICT-VUE'] = factory(global.Vue, global['MINI-MEMOIZE'], global['SHARED-JS-API']));
+}(this, (function (Vue, memoize, sharedJsApi) { 'use strict';
 
     function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -86,30 +86,6 @@
         return Store;
     }());
 
-    /**
-     * @description 获取 url 查询参数
-     * @param { string | string[] } name 参数 key，如果为数组，则返回多个
-     * @param { string } [ href = location.href ] 目标 url，不传默认为当前 url，即 location.href
-     * @return { string | string[] } 参数值 value，如果 name 为数组，则返回数组
-     * @example
-     * const href = 'https://www.baidu.com?name=tom&age=20'
-     * getQueryString('name', href) // tom
-     * getQueryString('age', href) // 20
-     * getQueryString(['name', 'age'], href) // ['tom', '20']
-     */
-    /**
-     * @description 将字符串转为数字，转换失败返回原参数
-     * @param { * } val 要转换的对象
-     * @returns { * } 成功返回数字，失败原样返回
-     * @example
-     * toNumber('1') // 1
-     * toNumber('a') // 'a'
-     */
-    function toNumber(val) {
-        var fmt = Number(val);
-        return isNaN(fmt) ? val : fmt;
-    }
-
     var defaultConfig = {
         async: false,
         props: { label: 'label', value: 'value', children: 'children' }
@@ -171,7 +147,7 @@
                 return null;
             for (var i = 0; i < data.length; i++) {
                 var item = data[i];
-                if (toNumber(item[props.value]) === toNumber(value))
+                if (sharedJsApi.toNumber(item[props.value]) === sharedJsApi.toNumber(value))
                     return item;
                 var children = item[props.children];
                 if (children) {
