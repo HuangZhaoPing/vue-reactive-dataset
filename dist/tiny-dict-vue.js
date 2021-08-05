@@ -1,8 +1,8 @@
-/* version: 1.0.9 */
+/* version: 1.1.0 */
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('vue'), require('memoizee')) :
-    typeof define === 'function' && define.amd ? define(['vue', 'memoizee'], factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global['TINY-DICT-VUE'] = factory(global.Vue, global.memoizee));
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('vue'), require('mini-memoize')) :
+    typeof define === 'function' && define.amd ? define(['vue', 'mini-memoize'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global['TINY-DICT-VUE'] = factory(global.Vue, global['MINI-MEMOIZE']));
 }(this, (function (Vue, memoize) { 'use strict';
 
     function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
@@ -114,14 +114,13 @@
         async: false,
         props: { label: 'label', value: 'value', children: 'children' }
     };
-    var defaultMax = 100;
     var Dict = /** @class */ (function () {
         function Dict(options) {
             this.config = options.config;
-            this.max = options.max || defaultMax;
+            this.max = options.max;
             this.store = new Store();
-            this.asyncMemo = memoize__default['default'](this.asyncHandler, { promise: true, max: this.max });
-            this.filterMemo = memoize__default['default'](this.filterHandler, { maxAge: 3600 });
+            this.asyncMemo = memoize__default['default'](this.asyncHandler, { max: this.max });
+            this.filterMemo = memoize__default['default'](this.filterHandler);
         }
         Object.defineProperty(Dict.prototype, "reactive", {
             get: function () {
@@ -224,12 +223,6 @@
                 }
             });
         };
-        Dict.prototype.fetch = function (key) {
-            this.store.delete(key);
-            this.deleteAsyncCache(key);
-            this.clearFilterCache();
-            return this.get(key);
-        };
         Dict.prototype.filter = function (options) {
             var _this = this;
             return new Promise(function (resolve, reject) {
@@ -238,6 +231,9 @@
                     .then(function () { return (resolve(_this.getFilterValue(options))); })
                     .catch(function (err) { return reject(err); });
             });
+        };
+        Dict.prototype.deleteFilterCache = function (key, value) {
+            return this.filterMemo.delete(key, value);
         };
         Dict.prototype.deleteAsyncCache = function (key) {
             return this.asyncMemo.delete(key);

@@ -1,3 +1,5 @@
+import { Memoize } from 'mini-memoize'
+
 declare interface DictProps {
   label?: string
   value?: string
@@ -25,8 +27,8 @@ declare class Dict {
   get reactive (): ReactiveOptions
   getConfig (key: string): DictConfig
   get (key: string): Promise<any>
-  fetch (key: string): Promise<any>
   filter (options: FilterOptions): Promise<any>
+  deleteFilterCache (key: string, value: string | number): boolean
   deleteAsyncCache (key: string): Promise<any>
   clearAsyncCache (): void
   clearFilterCache (): void
@@ -47,8 +49,8 @@ declare class Store {
   delete (key: string): boolean
 }
 
-declare type AsyncMemo = (key: string) => Promise<any>
-declare type FilterMemo = (key: string, value: string | number) => any
+declare type AsyncMemo = Memoize<(key: string) => Promise<any>>
+declare type FilterMemo = Memoize<(key: string, value: string | number) => any>
 
 export {
   ReactiveOptions,

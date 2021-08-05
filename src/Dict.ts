@@ -1,6 +1,6 @@
 import { DictConfig, DictOptions, DictProps, ReactiveOptions, FilterOptions, AsyncMemo, FilterMemo } from 'types'
 import Store from './Store'
-import memoize from 'memoizee'
+import memoize from 'mini-memoize'
 import { toNumber } from 'shared-js-api'
 
 const defaultConfig = {
@@ -8,21 +8,19 @@ const defaultConfig = {
   props: { label: 'label', value: 'value', children: 'children' }
 }
 
-const defaultMax = 100
-
 export default class Dict {
   private config: Record<string, DictConfig>
   private store: Store
-  private asyncMemo: (AsyncMemo) & memoize.Memoized<AsyncMemo>
-  private filterMemo: (FilterMemo) & memoize.Memoized<FilterMemo>
-  private max: number
+  private asyncMemo: AsyncMemo
+  private filterMemo: FilterMemo
+  private max: number | undefined
   
   constructor (options: DictOptions) {
     this.config = options.config
-    this.max = options.max || defaultMax
+    this.max = options.max
     this.store = new Store()
-    this.asyncMemo = memoize(this.asyncHandler, { promise: true, max: this.max })
-    this.filterMemo = memoize(this.filterHandler, { maxAge: 3600 })
+    this.asyncMemo = memoize(this.asyncHandler, { max: <number>this.max })
+    this.filterMemo = memoize(this.filterHandler)
   }
 
   get reactive (): ReactiveOptions {
@@ -108,13 +106,6 @@ export default class Dict {
     })
   }
 
-  fetch (key: string): Promise<any> {
-    this.store.delete(key)
-    this.deleteAsyncCache(key)
-    this.clearFilterCache()
-    return this.get(key)
-  }
-
   filter (options: FilterOptions): Promise<any> {
     return new Promise((resolve, reject) => {
       this
@@ -123,8 +114,12 @@ export default class Dict {
         .catch(err => reject(err))
     })
   }
+
+  deleteFilterCache (key: string, value: string | number): boolean {
+    return this.filterMemo.delete(key, value)
+  }
   
-  deleteAsyncCache (key: string): Promise<any> {
+  deleteAsyncCache (key: string): boolean {
     return this.asyncMemo.delete(key)
   }
 

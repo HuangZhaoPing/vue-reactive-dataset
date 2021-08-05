@@ -2,8 +2,6 @@
 
 一个基于 vue，集中式管理字典数据的插件，支持 vue2 与 vue3。
 
-注：**tiny-dict-vue 依赖了 memoizee，memoizee 在 vite 或 snowpack 构建的项目中使用会报错，等后续更新解决此问题**
-
 ## Features
 
 - 集中式
@@ -219,23 +217,6 @@ export default {
   setup () {
     // { async: false, data: [{ label: '男', value: 1 },{ label: '女', value: 2 }], props: { label: 'label', value: 'value', children: 'children' } }
     console.log(dict.getConfig('sex'))
-  }
-}
-```
-
-### fetch (key): Promise
-
-get 方法获取异步数据是有缓存的，只会在第一次请求异步数据，之后都会从缓存中获取，fetch 方法则每次都请求异步数据。
-
-```js
-import dict from '@/dict'
-
-export default {
-  setup () {
-    dict.fetch('channel').then(data => {
-      // [{ channelName: '苹果', channelId: 1 }, { channelName: '小米', channelId: 2 }]
-      console.log(data)
-    })
   }
 }
 ```

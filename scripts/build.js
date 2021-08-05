@@ -10,7 +10,7 @@ const mergeConfig = config => {
     banner: `/* version: ${version} */`,
     globals: {
       vue: 'Vue',
-      memoizee: 'memoizee'
+      'mini-memoize': 'MINI-MEMOIZE'
     },
     ...config
   }
@@ -32,5 +32,5 @@ export default {
     })
   ],
   plugins: [nodeResolve(), typescript()],
-  external: ['vue', 'memoizee']
+  external: ['vue', 'mini-memoize']
 }
