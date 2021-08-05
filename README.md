@@ -13,10 +13,8 @@
 
 ## Usage
 
-依赖 memoizee
-
 ```shell
-npm i memoizee tiny-dict-vue -S
+npm i tiny-dict-vue -S
 ```
 
 ```js

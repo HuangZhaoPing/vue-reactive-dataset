@@ -1,4 +1,4 @@
-/* version: 1.1.1 */
+/* version: 1.1.2 */
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('vue'), require('mini-memoize'), require('shared-js-api')) :
     typeof define === 'function' && define.amd ? define(['vue', 'mini-memoize', 'shared-js-api'], factory) :
