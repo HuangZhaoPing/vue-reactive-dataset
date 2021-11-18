@@ -242,7 +242,7 @@ export default {
 }
 ```
 
-### clearCache
+### clearCache()
 
 清除所有异步数据缓存。
 
