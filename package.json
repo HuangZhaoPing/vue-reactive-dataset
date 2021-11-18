@@ -1,6 +1,6 @@
 {
   "name": "tiny-dict-vue",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "",
   "main": "/dist/tiny-dict-vue.min.js",
   "scripts": {
@@ -49,7 +49,7 @@
     "vue": "^2.6.13"
   },
   "dependencies": {
-    "mini-memoize": "^1.0.2",
-    "shared-js-api": "^0.2.7"
+    "mini-memoize": "^1.0.5",
+    "shared-js-api": "^0.2.8"
   }
 }

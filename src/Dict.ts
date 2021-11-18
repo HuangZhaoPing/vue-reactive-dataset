@@ -1,133 +1,120 @@
-import { DictConfig, DictOptions, DictProps, ReactiveOptions, FilterOptions, AsyncMemo, FilterMemo } from 'types'
+import { DictOptions, DictConfig, AsyncMemo, FilterMemo, FilterOptions, DictProps, ValueType } from 'types'
 import Store from './Store'
+import { isArray, isFunction } from 'shared-js-api'
 import memoize from 'mini-memoize'
-import { toNumber } from 'shared-js-api'
 
-const defaultConfig = {
-  async: false,
-  props: { label: 'label', value: 'value', children: 'children' }
+const defaultProps: DictProps = {
+  name: 'name',
+  value: 'value',
+  children: 'children'
 }
 
 export default class Dict {
-  private config: Record<string, DictConfig>
   private store: Store
+  private config: Record<string, DictConfig>
+  private max: number
   private asyncMemo: AsyncMemo
   private filterMemo: FilterMemo
-  private max: number | undefined
-  
+
   constructor (options: DictOptions) {
-    this.config = options.config
-    this.max = options.max
+    const { max, config } = options
     this.store = new Store()
-    this.asyncMemo = memoize(this.asyncHandler, { max: <number>this.max })
-    this.filterMemo = memoize(this.filterHandler)
+    this.config = config
+    this.max = max || 100
+    this.asyncMemo = memoize(this.asyncMemoHandler, { max: this.max })
+    this.filterMemo = memoize(this.filterMemoHandler, { max: 1000 })
   }
 
-  get reactive (): ReactiveOptions {
+  get reactive () {
     return {
       get: (key: string): any => {
-        if (!this.store.has(key)) this.get(key)
-        return this.store.get(key)
-      },
-      filter: (options: FilterOptions): any => {
-        const key = options.key
         if (!this.store.has(key)) {
           this.get(key)
           return null
         }
-        return this.getFilterValue(options)
+        return this.store.get(key)
+      },
+      filter: (options: FilterOptions): any => {
+        if (!this.store.has(options.key)) {
+          this.get(options.key)
+          return null
+        }
+        return this.handleFilter(options)
       }
     }
   }
 
-  private async asyncHandler (key: string) {
-    try {
-      return await this.getConfig(key).data()
-    } catch (error) {
-      this.deleteAsyncCache(key)
-      Promise.reject(error)
+  get (key: string) {
+    const { data } = this.config[key]
+    if (isArray(data)) {
+      this.store.set(key, data)
+      return data
+    }
+    if (isFunction(data)) {
+      return this.asyncMemo(key).then((res: any) => {
+        this.store.set(key, res)
+        return res
+      })
     }
   }
 
-  private filterHandler (key: string, value: string | number) {
-    return this.excuteFilter(this.store.get(key), value, this.getConfig(key).props!)
+  filter (options: FilterOptions) {
+    const data = this.get(options.key)
+    if (isArray(data)) {
+      return this.handleFilter(options)
+    }
+    if (isFunction(data)) {
+      return data.then(() => {
+        return this.handleFilter(options)
+      })
+    }
   }
 
-  private excuteFilter (data: any, value: string | number, props: DictProps): any {
-    if (!data) return null
+  private async asyncMemoHandler (key: string) {
+    return await this.config[key].data()
+  }
+
+  private filterMemoHandler (key: string, value: ValueType) {
+    const data = this.store.get(key)
+    const props = Object.assign(defaultProps, this.config[key].props || {})
+    return this.getFilterResult(data, value, props)
+  }
+
+  private getFilterResult (data: any, value: ValueType, props: DictProps): any {
     for (let i = 0; i < data.length; i++) {
       const item = data[i]
-      if (toNumber(item[props.value!]) === toNumber(value)) return item
-      const children = item[props.children!]
-      if (children) {
-        const target = this.excuteFilter(children, value, props)
-        if (target) return target
+      if (item[props.value!] === value) return item
+      if (item[props.children!]) {
+        const result = this.getFilterResult(item[props.children!], value, props)
+        if (result) return result
       }
     }
     return null
   }
 
-  private getFilterValue (options: FilterOptions) {
-    const { key, value, returnLabel, propKey } = options
-    const props = this.getConfig(key).props
-    const data = this.filterMemo(key, value)
-    if (data) {
-      if (returnLabel) return data[props?.label!]
-      if (propKey) return Array.isArray(propKey) ? propKey.map((key: string) => data[key]) : data[propKey]
+  private handleFilter (options: FilterOptions) {
+    const { key, value, fields } = options
+    const result = this.filterMemo(key, value)
+    if (result && fields) {
+      return Array.isArray(fields) ? fields.map(key => result[key]) : result[fields];
     }
-    return data
+    return result
   }
 
-  getConfig (key: string): DictConfig {
-    const config = Object.assign({}, defaultConfig, this.config[key])
-    config.props = Object.assign({}, defaultConfig.props, this.config[key].props)
-    return config
+  getProps (key: string): DictProps {
+    return Object.assign(defaultProps, this.config[key].props)
   }
 
-  get (key: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      const config = this.getConfig(key)
-      if (!config) {
-        resolve([])
-      } else {
-        const { async, data } = config
-        if (async && typeof data === 'function') {
-          this.asyncMemo(key)
-            .then((data: any) => {
-              this.store.set(key, data)
-              resolve(data)
-            })
-            .catch((err: Error) => reject(err))
-        } else {
-          this.store.set(key, data)
-          resolve(data)
-        }
-      }
-    })
+  deleteCache (key: string): boolean {
+    const result = this.asyncMemo.delete(key)
+    if (result) {
+      this.filterMemo.delete((args: any[]) => args.includes(key))
+    }
+    return result
   }
 
-  filter (options: FilterOptions): Promise<any> {
-    return new Promise((resolve, reject) => {
-      this
-        .get(options.key)
-        .then(() => (resolve(this.getFilterValue(options))))
-        .catch(err => reject(err))
-    })
-  }
-
-  deleteFilterCache (key: string, value: string | number): boolean {
-    return this.filterMemo.delete(key, value)
-  }
-  
-  deleteAsyncCache (key: string): boolean {
-    return this.asyncMemo.delete(key)
-  }
-
-  clearAsyncCache () {
-    this.asyncMemo.clear()
-  }
-  
-  clearFilterCache () {
+  clearCache () {
     this.filterMemo.clear()
+    this.asyncMemo.clear()
   }
 }

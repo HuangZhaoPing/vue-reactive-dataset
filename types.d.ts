@@ -1,13 +1,13 @@
 import { Memoize } from 'mini-memoize'
 
+type ValueType = string | number | boolean
 declare interface DictProps {
-  label?: string
+  name?: string
   value?: string
   children?: string
 }
 
 declare interface DictConfig {
-  async?: boolean,
   props?: DictProps,
   data: any | Promise<any>
 }
@@ -25,20 +25,17 @@ declare interface ReactiveOptions {
 declare class Dict {
   constructor (options: DictOptions)
   get reactive (): ReactiveOptions
-  getConfig (key: string): DictConfig
-  get (key: string): Promise<any>
-  filter (options: FilterOptions): Promise<any>
-  deleteFilterCache (key: string, value: string | number): boolean
-  deleteAsyncCache (key: string): Promise<any>
-  clearAsyncCache (): void
-  clearFilterCache (): void
+  getProps (key: string): DictProps
+  get (key: string): any | Promise<any>
+  filter (options: FilterOptions): any | Promise<any>
+  deleteCache (key: string): boolean
+  clearCache (): void
 }
 
 declare interface FilterOptions {
   key: string
-  value: string | number
-  returnLabel?: boolean
-  propKey?: string | string[]
+  value: ValueType
+  fields?: string | string[]
 }
 
 declare class Store {
@@ -50,7 +47,7 @@ declare class Store {
 }
 
 declare type AsyncMemo = Memoize<(key: string) => Promise<any>>
-declare type FilterMemo = Memoize<(key: string, value: string | number) => any>
+declare type FilterMemo = Memoize<(key: string, value: ValueType) => any>
 
 export {
   ReactiveOptions,
@@ -60,7 +57,8 @@ export {
   FilterOptions,
   Store,
   AsyncMemo,
-  FilterMemo
+  FilterMemo,
+  ValueType
 }
 
 export default Dict

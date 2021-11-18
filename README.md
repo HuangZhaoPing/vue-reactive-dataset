@@ -43,19 +43,18 @@ const dict = new TinyDict({
     // 同步数据
     sex: {
       data: [
-        { label: '男', value: 1 },
-        { label: '女', value: 2 }
+        { name: '男', value: 1 },
+        { name: '女', value: 2 }
       ]
     },
     // 异步数据，假设接口返回 { "code": 200, data: [{ "channelName": "苹果", "channelId": 1 }, { "channelName": "小米", "channelId": 2 }] }
     channel: {
-      async: true,
       data: async () => {
         const { data } = await axios({ url: '/api/channel', method: 'GET' })
         return data || []
       },
       props: {
-        label: 'channelName',
+        name: 'channelName',
         value: 'channelId'
       }
     }
@@ -73,15 +72,14 @@ max 参数（可选）：
 
 config 参数：
 
-| Param |          Type          |                         Default                          | Required | Description                                    |
-| :---: | :--------------------: | :------------------------------------------------------: | :------: | ---------------------------------------------- |
-| async |        boolean         |                          false                           |  false   | 是否为异步数据                                 |
-| data  | array \| () => Promise |                            -                             |   true   | 当 async 为 true 时，必须是返回 Promise 的函数 |
-| props |         object         | { label: 'label', value: 'value', children: 'children' } |  false   | 数据的配置对象，调用 filter 方法时需要用到     |
+| Param |          Type          |                        Default                         | Required | Description                                |
+| :---: | :--------------------: | :----------------------------------------------------: | :------: | ------------------------------------------ |
+| data  | array \| () => Promise |                           -                            |   true   | 数据源                                     |
+| props |         object         | { name: 'name', value: 'value', children: 'children' } |  false   | 数据的配置对象，调用 filter 方法时需要用到 |
 
 ### reactive.get (key)
 
-响应式的获取一个字典数据。
+响应式的获取一个字典数据，对于异步数据，会自动请求接口，同一时间多次请求会合并成一次，请求成功后会将数据缓存，下次访问取缓存。
 
 ```html
 <template>
@@ -122,12 +120,12 @@ export default {
 
 ### reactive.filter (options)
 
-响应式的过滤一个字典数据。
+响应式的过滤一个字典数据，对于异步数据，会自动请求接口，同一时间多次请求会合并成一次，请求成功后会将数据缓存，下次访问取缓存，第一次过滤会缓存过滤结果，下次过滤取缓存。
 
 ```html
 <template>
   <!-- 最终渲染为：苹果 -->
-  <div>{{ dict.reactive.filter({ key: 'channel', value: 1, returnLabel: true }) }}</div>
+  <div>{{ dict.reactive.filter({ key: 'channel', value: 1, fields: 'channelName' }) }}</div>
 </template>
 
 <script>
@@ -143,26 +141,24 @@ export default {
 </script>
 ```
 
-|    Param    |        Type        | Default | Required | Description                                                  |
-| :---------: | :----------------: | :-----: | :------: | ------------------------------------------------------------ |
-|     Key     |       string       |    -    |   true   | 从哪个字典中过滤数据                                         |
-|    value    |  string \| number  |    -    |   true   | value 的值                                                   |
-| returnLabel |      boolean       |  false  |  false   | 若为 true，返回 label 的值，默认为 false 即返回整个对象      |
-|   propKey   | string \| string[] |    -    |  false   | 返回指定字段的值，如果为数组则返回多个，默认为空即返回整个对象 |
+| Param  |        Type        | Default | Required | Description                                                  |
+| :----: | :----------------: | :-----: | :------: | ------------------------------------------------------------ |
+|  Key   |       string       |    -    |   true   | 从哪个字典中过滤数据                                         |
+| value  |  string \| number  |    -    |   true   | value 的值                                                   |
+| fields | string \| string[] |    -    |  false   | 返回指定字段的值，如果为数组则返回多个，默认为空即返回整个对象 |
 
-### get (key): Promise
+### get (key)
 
-在 js 中获取字典数据，返回 Promise。
+在 js 中获取字典数据，如果是异步数据，返回 Promise。
 
 ```js
 import dict from '@/dict'
 
 export default {
   setup () {
-    dict.get('sex').then(data => {
-      // [{ label: '男', value: 1 }, { label: '女', value: 2 } ]
-      console.log(data)
-    })
+    // [{ name: '男', value: 1 }, { name: '女', value: 2 } ]
+    console.log(dict.get('sex'))
+    
     dict.get('channel').then(data => {
       // [{ channelName: '苹果', channelId: 1 }, { channelName: '小米', channelId: 2 }]
       console.log(data)
@@ -171,32 +167,29 @@ export default {
 }
 ```
 
-### filter (options): Promise
+### filter (options)
 
-在 js 中过滤字典数据，返回 Promise。参数与 reactive.filter 一致。
+在 js 中过滤字典数据，如果是异步数据，返回 Promise。参数与 reactive.filter 一致。
 
 ```js
 import dict from '@/dict'
 
 export default {
   setup () {
-    dict.filter({ key: 'sex', value: 1, returnLabel: true }).then(data => {
-      // 男
-      console.log(data)
-    })
+    // 男
+    console.log(dict.filter({ key: 'sex', value: 1, fields: 'name' }))
+    
     dict.filter({ key: 'channel', value: 1 }).then(data => {
       // { channelName: '苹果', channelId: 1 }
       console.log(data)
     })
-    dict.filter({ key: 'channel', value: 1, returnLabel: true }).then(data => {
+    
+    dict.filter({ key: 'channel', value: 1, fields: 'channelName' }).then(data => {
       // 苹果
       console.log(data)
     })
-    dict.filter({ key: 'channel', value: 1, propKey: 'channelName' }).then(data => {
-      // 苹果
-      console.log(data)
-    })
-    dict.filter({ key: 'channel', value: 1, propKey: [ 'channelName', 'channelId' ] }).then(data => {
+    
+    dict.filter({ key: 'channel', value: 1, fields: [ 'channelName', 'channelId' ] }).then(data => {
       // [ '苹果', 1 ]
       console.log(data)
     })
@@ -204,7 +197,7 @@ export default {
 }
 ```
 
-### getConfig (key): object
+### getProps (key)
 
 获取一个字典的配置。
 
@@ -213,11 +206,45 @@ import dict from '@/dict'
 
 export default {
   setup () {
-    // { async: false, data: [{ label: '男', value: 1 },{ label: '女', value: 2 }], props: { label: 'label', value: 'value', children: 'children' } }
+    // { name: 'name', value: 'value', children: 'children' }
     console.log(dict.getConfig('sex'))
   }
 }
 ```
+
+### deleteCache(key)
+
+对于异步数据，调用 get、filter、reactive.get、reactive.filter 后，会将异步数据存入缓存，如果需要清除缓存，可以调用此方法。
+
+```js
+import dict from '@/dict'
+
+export default {
+  setup () {
+    // 请求接口
+    dict.get('channel').then(data => {
+      console.log(data)
+    })
+    
+    // 命中缓存
+    dict.get('channel').then(data => {
+      console.log(data)
+    })
+    
+    // 清除缓存
+    dict.deleteCache('channel')
+    
+    // 请求接口
+    dict.get('channel').then(data => {
+      console.log(data)
+    })
+  }
+}
+```
+
+### clearCache
+
+清除所有异步数据缓存。
 
 ## 浅谈组件封装
 
@@ -235,7 +262,7 @@ DictSelect.vue：
     <el-option
       v-for="item in data"
       :key="item[value]"
-      :label="item[label]"
+      :label="item[name]"
       :value="item[value]" />
   </el-select>
 </template>
@@ -252,12 +279,11 @@ export default {
     }
   },
   setup ({ dictKey }) {
-    const config = dict.getConfig(dictKey)
     const data = computed(() => dict.reactive.get(dictKey) || [])
-    const { label, value } = config.props
+    const { name, value } = dict.getProps(dictKey)
     return {
       data,
-      label,
+      name,
       value
     }
   }
@@ -298,7 +324,7 @@ export default {
 
 ### 表格
 
-有时后端返回的表格数据只有 id，没有 name，如果想要 name，就需要前端去请求接口，再根据每行数据的 id 进行遍历取得 name，不仅麻烦性能也差，配合 tiny-dict-vue 封装一个表格列：
+有时后端返回的表格数据只有 id，没有 name，如果想要 name，就需要前端去请求接口，再根据每行数据的 id 进行遍历取得 name，不仅麻烦性能也差，配合 tiny-dict-vue 封装一个表格列，相同的 value，只会在第一次进行遍历，之后取缓存：
 
 DictTableColumn.vue：
 
@@ -321,7 +347,7 @@ export default {
       return dict.reactive.filter({
         key: dictKey,
         value: row[prop],
-        returnLabel: true
+        fields: dict.getProps().name
       }) || '-'
     }
     return {
@@ -411,7 +437,7 @@ function getDictConfig (type) {
     async: true,
     data: () => getRemoteDict(type),
     props: {
-      label: 'name',
+      name: 'name',
       value: 'id'
     }
   }

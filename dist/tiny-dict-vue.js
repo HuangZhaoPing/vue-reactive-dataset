@@ -1,9 +1,9 @@
-/* version: 1.1.2 */
+/* version: 1.1.3 */
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('vue'), require('mini-memoize'), require('shared-js-api')) :
-    typeof define === 'function' && define.amd ? define(['vue', 'mini-memoize', 'shared-js-api'], factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global['TINY-DICT-VUE'] = factory(global.Vue, global['MINI-MEMOIZE'], global['SHARED-JS-API']));
-}(this, (function (Vue, memoize, sharedJsApi) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('vue'), require('shared-js-api'), require('mini-memoize')) :
+    typeof define === 'function' && define.amd ? define(['vue', 'shared-js-api', 'mini-memoize'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global['TINY-DICT-VUE'] = factory(global.Vue, global['SHARED-JS-API'], global['MINI-MEMOIZE']));
+}(this, (function (Vue, sharedJsApi, memoize) { 'use strict';
 
     function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -86,139 +86,118 @@
         return Store;
     }());
 
-    var defaultConfig = {
-        async: false,
-        props: { label: 'label', value: 'value', children: 'children' }
+    var defaultProps = {
+        name: 'name',
+        value: 'value',
+        children: 'children'
     };
     var Dict = /** @class */ (function () {
         function Dict(options) {
-            this.config = options.config;
-            this.max = options.max;
+            var max = options.max, config = options.config;
             this.store = new Store();
-            this.asyncMemo = memoize__default['default'](this.asyncHandler, { max: this.max });
-            this.filterMemo = memoize__default['default'](this.filterHandler);
+            this.config = config;
+            this.max = max || 100;
+            this.asyncMemo = memoize__default['default'](this.asyncMemoHandler, { max: this.max });
+            this.filterMemo = memoize__default['default'](this.filterMemoHandler, { max: 1000 });
         }
         Object.defineProperty(Dict.prototype, "reactive", {
             get: function () {
                 var _this = this;
                 return {
                     get: function (key) {
-                        if (!_this.store.has(key))
-                            _this.get(key);
-                        return _this.store.get(key);
-                    },
-                    filter: function (options) {
-                        var key = options.key;
                         if (!_this.store.has(key)) {
                             _this.get(key);
                             return null;
                         }
-                        return _this.getFilterValue(options);
+                        return _this.store.get(key);
+                    },
+                    filter: function (options) {
+                        if (!_this.store.has(options.key)) {
+                            _this.get(options.key);
+                            return null;
+                        }
+                        return _this.handleFilter(options);
                     }
                 };
             },
             enumerable: false,
             configurable: true
         });
-        Dict.prototype.asyncHandler = function (key) {
+        Dict.prototype.get = function (key) {
+            var _this = this;
+            var data = this.config[key].data;
+            if (sharedJsApi.isArray(data)) {
+                this.store.set(key, data);
+                return data;
+            }
+            if (sharedJsApi.isFunction(data)) {
+                return this.asyncMemo(key).then(function (res) {
+                    _this.store.set(key, res);
+                    return res;
+                });
+            }
+        };
+        Dict.prototype.filter = function (options) {
+            var _this = this;
+            var data = this.get(options.key);
+            if (sharedJsApi.isArray(data)) {
+                return this.handleFilter(options);
+            }
+            if (sharedJsApi.isFunction(data)) {
+                return data.then(function () {
+                    return _this.handleFilter(options);
+                });
+            }
+        };
+        Dict.prototype.asyncMemoHandler = function (key) {
             return __awaiter(this, void 0, void 0, function () {
-                var error_1;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
-                        case 0:
-                            _a.trys.push([0, 2, , 3]);
-                            return [4 /*yield*/, this.getConfig(key).data()];
+                        case 0: return [4 /*yield*/, this.config[key].data()];
                         case 1: return [2 /*return*/, _a.sent()];
-                        case 2:
-                            error_1 = _a.sent();
-                            this.deleteAsyncCache(key);
-                            Promise.reject(error_1);
-                            return [3 /*break*/, 3];
-                        case 3: return [2 /*return*/];
                     }
                 });
             });
         };
-        Dict.prototype.filterHandler = function (key, value) {
-            return this.excuteFilter(this.store.get(key), value, this.getConfig(key).props);
+        Dict.prototype.filterMemoHandler = function (key, value) {
+            var data = this.store.get(key);
+            var props = Object.assign(defaultProps, this.config[key].props || {});
+            return this.getFilterResult(data, value, props);
         };
-        Dict.prototype.excuteFilter = function (data, value, props) {
-            if (!data)
-                return null;
+        Dict.prototype.getFilterResult = function (data, value, props) {
             for (var i = 0; i < data.length; i++) {
                 var item = data[i];
-                if (sharedJsApi.toNumber(item[props.value]) === sharedJsApi.toNumber(value))
+                if (item[props.value] === value)
                     return item;
-                var children = item[props.children];
-                if (children) {
-                    var target = this.excuteFilter(children, value, props);
-                    if (target)
-                        return target;
+                if (item[props.children]) {
+                    var result = this.getFilterResult(item[props.children], value, props);
+                    if (result)
+                        return result;
                 }
             }
             return null;
         };
-        Dict.prototype.getFilterValue = function (options) {
-            var key = options.key, value = options.value, returnLabel = options.returnLabel, propKey = options.propKey;
-            var props = this.getConfig(key).props;
-            var data = this.filterMemo(key, value);
-            if (data) {
-                if (returnLabel)
-                    return data[props === null || props === void 0 ? void 0 : props.label];
-                if (propKey)
-                    return Array.isArray(propKey) ? propKey.map(function (key) { return data[key]; }) : data[propKey];
+        Dict.prototype.handleFilter = function (options) {
+            var key = options.key, value = options.value, fields = options.fields;
+            var result = this.filterMemo(key, value);
+            if (result && fields) {
+                return Array.isArray(fields) ? fields.map(function (key) { return result[key]; }) : result[fields];
             }
-            return data;
+            return result;
         };
-        Dict.prototype.getConfig = function (key) {
-            var config = Object.assign({}, defaultConfig, this.config[key]);
-            config.props = Object.assign({}, defaultConfig.props, this.config[key].props);
-            return config;
+        Dict.prototype.getProps = function (key) {
+            return Object.assign(defaultProps, this.config[key].props);
         };
-        Dict.prototype.get = function (key) {
-            var _this = this;
-            return new Promise(function (resolve, reject) {
-                var config = _this.getConfig(key);
-                if (!config) {
-                    resolve([]);
-                }
-                else {
-                    var async = config.async, data = config.data;
-                    if (async && typeof data === 'function') {
-                        _this.asyncMemo(key)
-                            .then(function (data) {
-                            _this.store.set(key, data);
-                            resolve(data);
-                        })
-                            .catch(function (err) { return reject(err); });
-                    }
-                    else {
-                        _this.store.set(key, data);
-                        resolve(data);
-                    }
-                }
-            });
+        Dict.prototype.deleteCache = function (key) {
+            var result = this.asyncMemo.delete(key);
+            if (result) {
+                this.filterMemo.delete(function (args) { return args.includes(key); });
+            }
+            return result;
         };
-        Dict.prototype.filter = function (options) {
-            var _this = this;
-            return new Promise(function (resolve, reject) {
-                _this
-                    .get(options.key)
-                    .then(function () { return (resolve(_this.getFilterValue(options))); })
-                    .catch(function (err) { return reject(err); });
-            });
-        };
-        Dict.prototype.deleteFilterCache = function (key, value) {
-            return this.filterMemo.delete(key, value);
-        };
-        Dict.prototype.deleteAsyncCache = function (key) {
-            return this.asyncMemo.delete(key);
-        };
-        Dict.prototype.clearAsyncCache = function () {
-            this.asyncMemo.clear();
-        };
-        Dict.prototype.clearFilterCache = function () {
+        Dict.prototype.clearCache = function () {
             this.filterMemo.clear();
+            this.asyncMemo.clear();
         };
         return Dict;
     }());
