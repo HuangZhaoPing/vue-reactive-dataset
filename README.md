@@ -27,7 +27,7 @@ export default dict
 
 ## Api
 
-### constructor (options)
+### constructor(options)
 
 构造函数。
 
@@ -77,7 +77,7 @@ config 参数：
 | data  | array \| () => Promise |                           -                            |   true   | 数据源                                     |
 | props |         object         | { name: 'name', value: 'value', children: 'children' } |  false   | 数据的配置对象，调用 filter 方法时需要用到 |
 
-### reactive.get (key)
+### reactive.get(key)
 
 响应式的获取一个字典数据，对于异步数据，会自动请求接口，同一时间多次请求会合并成一次，请求成功后会将数据缓存，下次访问取缓存。
 
@@ -118,7 +118,7 @@ export default {
 </script>
 ```
 
-### reactive.filter (options)
+### reactive.filter(options)
 
 响应式的过滤一个字典数据，对于异步数据，会自动请求接口，同一时间多次请求会合并成一次，请求成功后会将数据缓存，下次访问取缓存，第一次过滤会缓存过滤结果，下次过滤取缓存。
 
@@ -147,7 +147,7 @@ export default {
 | value  |  string \| number  |    -    |   true   | value 的值                                                   |
 | fields | string \| string[] |    -    |  false   | 返回指定字段的值，如果为数组则返回多个，默认为空即返回整个对象 |
 
-### get (key)
+### get(key)
 
 在 js 中获取字典数据，如果是异步数据，返回 Promise。
 
@@ -167,7 +167,7 @@ export default {
 }
 ```
 
-### filter (options)
+### filter(options)
 
 在 js 中过滤字典数据，如果是异步数据，返回 Promise。参数与 reactive.filter 一致。
 
@@ -197,7 +197,7 @@ export default {
 }
 ```
 
-### getProps (key)
+### getProps(key)
 
 获取一个字典的配置。
 
@@ -246,6 +246,9 @@ export default {
 
 清除所有异步数据缓存。
 
+### refresh(key)
+
+重新获取异步数据，更新 store。
 ## 浅谈组件封装
 
 此文档仅提供简单思路，不深入封装细节，以抛砖引玉。
