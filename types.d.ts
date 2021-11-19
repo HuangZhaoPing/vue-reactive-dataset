@@ -30,6 +30,7 @@ declare class Dict {
   filter (options: FilterOptions): any | Promise<any>
   deleteCache (key: string): boolean
   clearCache (): void
+  refresh (key: string): void
 }
 
 declare interface FilterOptions {

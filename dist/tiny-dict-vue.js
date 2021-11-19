@@ -1,4 +1,4 @@
-/* version: 1.1.3 */
+/* version: 1.1.4 */
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('vue'), require('shared-js-api'), require('mini-memoize')) :
     typeof define === 'function' && define.amd ? define(['vue', 'shared-js-api', 'mini-memoize'], factory) :
@@ -198,6 +198,10 @@
         Dict.prototype.clearCache = function () {
             this.filterMemo.clear();
             this.asyncMemo.clear();
+        };
+        Dict.prototype.refresh = function (key) {
+            this.deleteCache(key);
+            this.get(key);
         };
         return Dict;
     }());

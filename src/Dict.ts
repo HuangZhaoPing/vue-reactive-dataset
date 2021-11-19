@@ -117,4 +117,9 @@ export default class Dict {
     this.filterMemo.clear()
     this.asyncMemo.clear()
   }
+
+  refresh (key: string) {
+    this.deleteCache(key)
+    this.get(key)
+  }
 }

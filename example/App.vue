@@ -14,15 +14,9 @@ import dict from './dict'
 
 export default defineComponent({
   setup () {
-    console.log(dict.get('sex'))
-    console.log(dict.filter({key: 'sex', value: 21, fields: 'name'}))
     dict.get('channel').then((data: any) => {
       console.log(data)
     })
-    dict.get('channel').then((data: any) => {
-      console.log(data)
-    })
-    dict.deleteCache('channel')
     dict.get('channel').then((data: any) => {
       console.log(data)
     })
