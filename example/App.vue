@@ -1,28 +1,21 @@
 <template>
   <div>
-    {{ dict.reactive.get('sex') }}
+    <ul>
+      <li v-for="item in dataset.get({ name: 'gradeList' })" :key="item.id">{{ item.name }}</li>
+    </ul>
 
-    <div>{{ dict.reactive.get('channel') }}</div>
+    <h1>{{ dataset.filter({ name: 'gradeList', value: 1 }) }}</h1>
 
-    <div>{{ dict.reactive.filter({key: 'channel', value: 1, fields: ['channelId', 'channelName']}) }}</div>
+    <h1>{{ dataset.filter({ name: 'gradeList', value: 1, params: { id: 1 } }) }}</h1>
+
+    <ul>
+      <li v-for="item in dataset.get({ name: 'sex' })" :key="item.value">{{ item.name }}</li>
+    </ul>
+
+    <h1>{{ dataset.filter({ name: 'sex', value: 1 }) }}</h1>
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
-import dict from './dict'
-
-export default defineComponent({
-  setup () {
-    dict.get('channel').then((data: any) => {
-      console.log(data)
-    })
-    dict.get('channel').then((data: any) => {
-      console.log(data)
-    })
-    return {
-      dict
-    }
-  }
-})
+<script lang="ts" setup>
+import dataset from './dataset'
 </script>

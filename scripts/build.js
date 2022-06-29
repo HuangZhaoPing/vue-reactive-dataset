@@ -1,4 +1,4 @@
-import typescript from '@rollup/plugin-typescript'
+import typescript from 'rollup-plugin-typescript2'
 import { terser } from 'rollup-plugin-terser'
 import { name, version } from '../package.json'
 
@@ -8,9 +8,7 @@ const mergeConfig = config => {
     name: name.toUpperCase(),
     banner: `/* version: ${version} */`,
     globals: {
-      vue: 'Vue',
-      'shared-js-api': 'SHARED-JS-API',
-      'mini-memoize': 'MINI-MEMOIZE'
+      vue: 'Vue'
     },
     ...config
   }
@@ -32,5 +30,5 @@ export default {
     })
   ],
   plugins: [typescript()],
-  external: ['vue', 'shared-js-api', 'mini-memoize']
+  external: ['vue']
 }

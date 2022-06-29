@@ -1,21 +1,14 @@
-// @ts-ignore
-import Vue from 'vue'
-// @ts-ignore
 import { reactive } from 'vue'
 
-const isVue3: boolean = !!reactive
-
-class Store {
+export default class Store {
   private store: any
 
   constructor () {
-    // @ts-ignore
-    this.store = isVue3 ? reactive({}) : Vue.observable({})
+    this.store = reactive({})
   }
 
-  set (key: string, value: any): void {
-    // @ts-ignore
-    isVue3 ? (this.store[key] = value) : (Vue.set(this.store, key, value))
+  set (key: string, value: any) {
+    this.store[key] = value
   }
 
   get (key: string): any {
@@ -30,5 +23,3 @@ class Store {
     return Reflect.deleteProperty(this.store, key)
   }
 }
-
-export default Store
