@@ -1,6 +1,6 @@
 {
   "name": "vue-reactive-dataset",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "dev": "vite --config scripts/example.js",
     "build": "rollup --config scripts/build.js"

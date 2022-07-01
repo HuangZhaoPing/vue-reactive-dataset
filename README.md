@@ -122,9 +122,13 @@ dataset.filter({ name: 'channel', promise: true, value: 1 }).then(data => {
 </script>
 ```
 
-### deleteCache(name)
+### deleteCache(options)
 
 清除某个字段的缓存，下次调用 get 或 filter 时，重新获取数据。
+
+```js
+dataset.deleteCache({ name: 'channel' })
+```
 
 ### 带参数
 
