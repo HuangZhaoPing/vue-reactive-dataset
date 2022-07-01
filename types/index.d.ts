@@ -21,6 +21,11 @@ interface GetOptions {
   promise?: boolean
 }
 
+interface DeleteCacheOptions {
+  name: string,
+  params?: Record<string, any>
+}
+
 interface FilterOptions {
   name: string
   value: any,
@@ -51,7 +56,8 @@ export {
   FilterOptions,
   GetOptions,
   Memoize,
-  Dataset
+  Dataset,
+  DeleteCacheOptions
 }
 
 export default Dataset

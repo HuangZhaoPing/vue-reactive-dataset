@@ -1,7 +1,6 @@
-
 import memoize from './memoize'
 import Store from './store'
-import { DatasetOptions, GetOptions, FilterOptions } from '../types'
+import { DatasetOptions, GetOptions, FilterOptions, DeleteCacheOptions } from '../types'
 
 class Dataset {
   private options
@@ -10,7 +9,7 @@ class Dataset {
   private memoFilter
 
   constructor (options: DatasetOptions) {
-    options.max = options.max || 50
+    options.max = options.max || 100
     this.options = options
     this.store = new Store()
     this.memoFetch = memoize(this.fetch, this.options.max)
@@ -23,7 +22,7 @@ class Dataset {
     if (promise) {
       return value
     } else {
-      return this.store.get(name)
+      return this.store.get(this.getFullname(name, params))
     }
   }
 
@@ -32,13 +31,14 @@ class Dataset {
     const data = this.options.config?.[name]?.data
     if (typeof data === 'function') {
       const value = await data(params)
-      !this.store.has(name) && this.store.set(name, value)
+      this.store.set(this.getFullname(name, params), value)
       return value
     }
   }
 
-  deleteCache (name: string) {
-    this.memoFetch.delete(name)
+  deleteCache (options: DeleteCacheOptions) {
+    const { name, params } = options
+    this.memoFetch.delete(name, JSON.stringify(params))
     this.memoFilter.clear()
   }
 
@@ -50,17 +50,18 @@ class Dataset {
       ))
     } else {
       this.get({ name, promise, params })
-      if (!this.store.get(name)) {
-        return options.defaultValue
+      const defaultValue = options.defaultValue
+      if (!this.store.get(this.getFullname(name, params))) {
+        return defaultValue
       } else {
-        return this.getValue(options)
+        return this.getValue(options) || defaultValue
       }
     }
   }
 
-  private handleFilter (name: string, value: any) {
+  private handleFilter (name: string, fullname: string, value: any) {
     const props = this.getProps(name)
-    const data = [...this.store.get(name)]
+    const data = [...this.store.get(fullname)]
     let node = null
     /* eslint no-cond-assign: "off" */
     while (node = data.shift()) {
@@ -84,13 +85,17 @@ class Dataset {
   }
 
   private getValue (options: FilterOptions) {
-    const { name, value, original, fields } = options
+    const { name, value, original, fields, params } = options
     const props = this.getProps(name)
-    const target = this.memoFilter(name, value)
+    const target = this.memoFilter(name, this.getFullname(name, params), value)
     if (!target) return null
     if (original) return target
     if (Array.isArray(fields)) return fields.map((key: string) => target[key])
     return target[props.name]
+  }
+
+  private getFullname (name: string, params?: Record<string, any>) {
+    return params ? `${name}_${JSON.stringify(params)}` : name
   }
 }
 

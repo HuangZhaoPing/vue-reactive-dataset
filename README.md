@@ -65,7 +65,7 @@ import dataset from './dataset.js'
 import Dataset from 'vue-reactive-dataset'
 
 export default new Dataset({
-  max: 100, // 最大缓存，默认50
+  max: 100, // 最大缓存，默认100
   config: {
     sex: {
       data: () => {}, // 数据，可返回 promise
