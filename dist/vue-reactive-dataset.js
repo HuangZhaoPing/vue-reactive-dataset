@@ -1,4 +1,4 @@
-/* version: 1.0.0 */
+/* version: 1.0.2 */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('vue')) :
   typeof define === 'function' && define.amd ? define(['vue'], factory) :
@@ -88,7 +88,7 @@
       memoFetch;
       memoFilter;
       constructor(options) {
-          options.max = options.max || 50;
+          options.max = options.max || 100;
           this.options = options;
           this.store = new Store();
           this.memoFetch = memoize(this.fetch, this.options.max);
@@ -97,24 +97,24 @@
       get(options) {
           const { name, promise, params } = options;
           const value = this.memoFetch(name, JSON.stringify(params));
-          if (promise) {
-              return value;
-          }
-          else {
-              return this.store.get(name);
-          }
+          return promise ? value : this.store.get(this.getFullname(name, params));
       }
       async fetch(name, val) {
           const params = val ? JSON.parse(val) : val;
           const data = this.options.config?.[name]?.data;
           if (typeof data === 'function') {
               const value = await data(params);
-              !this.store.has(name) && this.store.set(name, value);
+              this.store.set(this.getFullname(name, params), value);
               return value;
           }
       }
-      deleteCache(name) {
-          this.memoFetch.delete(name);
+      delete(options) {
+          const { name, params } = options;
+          this.memoFetch.delete(name, JSON.stringify(params));
+          this.memoFilter.clear();
+      }
+      clear() {
+          this.memoFetch.clear();
           this.memoFilter.clear();
       }
       filter(options) {
@@ -124,17 +124,18 @@
           }
           else {
               this.get({ name, promise, params });
-              if (!this.store.get(name)) {
-                  return options.defaultValue;
+              const defaultValue = options.defaultValue;
+              if (!this.store.get(this.getFullname(name, params))) {
+                  return defaultValue;
               }
               else {
-                  return this.getValue(options);
+                  return this.getValue(options) || defaultValue;
               }
           }
       }
-      handleFilter(name, value) {
+      handleFilter(name, fullname, value) {
           const props = this.getProps(name);
-          const data = [...this.store.get(name)];
+          const data = [...this.store.get(fullname)];
           let node = null;
           /* eslint no-cond-assign: "off" */
           while (node = data.shift()) {
@@ -157,9 +158,9 @@
           return Object.assign({}, defaultProps, this.options.config[name].props);
       }
       getValue(options) {
-          const { name, value, original, fields } = options;
+          const { name, value, original, fields, params } = options;
           const props = this.getProps(name);
-          const target = this.memoFilter(name, value);
+          const target = this.memoFilter(name, this.getFullname(name, params), value);
           if (!target)
               return null;
           if (original)
@@ -167,6 +168,9 @@
           if (Array.isArray(fields))
               return fields.map((key) => target[key]);
           return target[props.name];
+      }
+      getFullname(name, params) {
+          return params ? `${name}_${JSON.stringify(params)}` : name;
       }
   }
 

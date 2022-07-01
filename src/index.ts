@@ -19,11 +19,7 @@ class Dataset {
   get (options: GetOptions) {
     const { name, promise, params } = options
     const value = this.memoFetch(name, JSON.stringify(params))
-    if (promise) {
-      return value
-    } else {
-      return this.store.get(this.getFullname(name, params))
-    }
+    return promise ? value : this.store.get(this.getFullname(name, params))
   }
 
   private async fetch (name: string, val: string) {
@@ -36,9 +32,14 @@ class Dataset {
     }
   }
 
-  deleteCache (options: DeleteCacheOptions) {
+  delete (options: DeleteCacheOptions) {
     const { name, params } = options
     this.memoFetch.delete(name, JSON.stringify(params))
+    this.memoFilter.clear()
+  }
+
+  clear () {
+    this.memoFetch.clear()
     this.memoFilter.clear()
   }
 

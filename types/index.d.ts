@@ -44,7 +44,8 @@ type Memoize<T> = T & {
 declare class Dataset {
   constructor (options: DatasetOptions)
   get (options: GetOptions): any
-  deleteCache (name: string): void
+  delete (name: string): void
+  clear (): void
   filter (options: FilterOptions): any
   getProps (name: string): DatasetProps
 }

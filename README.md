@@ -82,6 +82,8 @@ export default new Dataset({
 
 ### get(options)
 
+获取数据。
+
 ```html
 <template>
   <!-- 模板形式 -->
@@ -99,6 +101,8 @@ dataset.get({ name: 'channel', promise: true }).then(data => {
 ```
 
 ### filter(options)
+
+过滤数据，默认返回 name
 
 ```html
 <template>
@@ -122,14 +126,18 @@ dataset.filter({ name: 'channel', promise: true, value: 1 }).then(data => {
 </script>
 ```
 
-### deleteCache(options)
+### delete(options)
 
 清除某个字段的缓存，下次调用 get 或 filter 时，重新获取数据。
 
 ```js
 dataset.deleteCache({ name: 'channel' })
+dataset.deleteCache({ name: 'channel', params: { id: 1 } })
 ```
 
+### clear()
+
+清除所有缓存。
 ### 带参数
 
 如果接口需要传参，可以这样做：
