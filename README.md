@@ -138,6 +138,7 @@ dataset.deleteCache({ name: 'channel', params: { id: 1 } })
 ### clear()
 
 清除所有缓存。
+
 ### 带参数
 
 如果接口需要传参，可以这样做：

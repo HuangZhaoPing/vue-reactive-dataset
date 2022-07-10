@@ -1,4 +1,4 @@
-/* version: 1.0.2 */
+/* version: 1.0.3 */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('vue')) :
   typeof define === 'function' && define.amd ? define(['vue'], factory) :
